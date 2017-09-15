@@ -12,6 +12,8 @@ assemblyJarName in assembly := s"${name.value}.jar"
 
 enablePlugins(DockerPlugin)
 
+enablePlugins(ScalaJSPlugin)
+
 dockerfile in docker := {
   val artifact: File = assembly.value
   val artifactTargetPath = s"/app/${artifact.name}"
