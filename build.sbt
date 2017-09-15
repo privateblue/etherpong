@@ -5,7 +5,8 @@ name := "etherpong"
 scalaVersion := "2.12.3"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "1.0.0-MF"
+  "org.typelevel" %% "cats-core" % "1.0.0-MF",
+  "org.scala-js" %%% "scalajs-dom" % "0.9.1"
 )
 
 assemblyJarName in assembly := s"${name.value}.jar"

@@ -1,3 +1,5 @@
+package etherpong
+
 case class Point(x: Int, y: Int)
 
 trait Player

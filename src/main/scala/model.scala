@@ -1,6 +1,8 @@
+package etherpong
+
 import scala.util.Random
 
-object Etherpong {
+object Model {
   def next(game: Game): Game = {
     import game.config._
     game.state match {
