@@ -11,11 +11,11 @@ import scala.util.Random
 @JSExportTopLevel("etherpong.View")
 object View {
   val config = Config(
-    width = 480,
-    height = 320,
-    paddleLength = 30,
-    paddleWidth = 10,
-    ballSize = 5
+    width = 800,
+    height = 600,
+    paddleLength = 100,
+    paddleWidth = 20,
+    ballSize = 10
   )
 
   val init = Game(
