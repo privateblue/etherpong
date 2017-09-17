@@ -7,7 +7,7 @@ object Model {
     import config._
     val (posX, velX) = player match {
       case Player.Left =>
-        (paddleWidth + ballSize, Random.nextInt(3) + 1)
+        (paddleWidth, Random.nextInt(3) + 1)
       case Player.Right =>
         (width - paddleWidth - ballSize, -1 * Random.nextInt(3) - 1)
     }
@@ -43,7 +43,7 @@ object Model {
       bottom = leftPaddlePos + paddleLength
     )
 
-    if (ballPos.x + ballVel.x < paddleWidth + ballSize && !leftPadHit) {
+    if (ballPos.x + ballVel.x < paddleWidth && !leftPadHit) {
       val st = start(Player.Right, config)
       State(
         config = config,
@@ -70,13 +70,15 @@ object Model {
         pos = ballPos.x,
         vel = ballVel.x,
         size = width,
-        offset = paddleWidth + ballSize
+        edge = paddleWidth,
+        ballSize = ballSize
       )
       val (py, vy) = move(
         pos = ballPos.y,
         vel = ballVel.y,
         size = height,
-        offset = ballSize
+        edge = 0,
+        ballSize = ballSize
       )
       State(
         config = config,
@@ -90,18 +92,21 @@ object Model {
     }
   }
 
-  def move(pos: Int, vel: Int, size: Int, offset: Int): (Int, Int) = {
-    def bounce(y: Int) = math.abs(y - offset) + offset
+  def move(pos: Int, vel: Int, size: Int, edge: Int, ballSize: Int): (Int, Int) = {
+    def bounce(y: Int, offset: Int) = math.abs(y - offset) + offset
     val sum = pos + vel
-    if (sum < offset) (bounce(sum), -1 * vel)
-    else if (sum > size - offset) (size - bounce(size - sum), -1 * vel)
-    else (sum, vel)
+    if (sum < edge)
+      (bounce(sum, edge), -1 * vel)
+    else if (sum > size - edge - ballSize)
+      (size - bounce(size - sum, edge + ballSize), -1 * vel)
+    else
+      (sum, vel)
   }
 
   def touches(pos: Point, vel: Point, ballSize: Int,
               x: Int, top: Int, bottom: Int): Boolean = {
     val a = vel.y / vel.x.toDouble
-    val offset = if (math.signum(vel.x) < 0) ballSize else -1 * ballSize
+    val offset = if (math.signum(vel.x) < 0) 0 else -1 * ballSize
     val y = (x - pos.x + offset) * a + pos.y
     top - 1 <= y && y <= bottom + 1
   }

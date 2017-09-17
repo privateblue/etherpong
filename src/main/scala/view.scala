@@ -14,8 +14,8 @@ object View {
     width = 800,
     height = 600,
     paddleLength = 100,
-    paddleWidth = 20,
-    ballSize = 10
+    paddleWidth = 15,
+    ballSize = 15
   )
 
   @JSExport
@@ -29,15 +29,13 @@ object View {
   }
 
   def draw(ctx: dom.CanvasRenderingContext2D, state: State): Unit = {
+    import ctx._
     import state._
     import state.config._
-    ctx.clearRect(0, 0, width, height)
-    ctx.fillStyle = "rgb(0,0,0)"
-    ctx.fillRect(0, leftPaddlePos, paddleWidth, paddleLength)
-    ctx.fillRect(width - paddleWidth, rightPaddlePos, paddleWidth, paddleLength)
-    ctx.beginPath()
-    ctx.arc(ballPos.x, ballPos.y, ballSize, 0, 2 * math.Pi)
-    ctx.closePath()
-    ctx.fill()
+    clearRect(0, 0, width, height)
+    fillStyle = "rgb(0,0,0)"
+    fillRect(0, leftPaddlePos, paddleWidth, paddleLength)
+    fillRect(width - paddleWidth, rightPaddlePos, paddleWidth, paddleLength)
+    fillRect(ballPos.x, ballPos.y, ballSize, ballSize)
   }
 }
