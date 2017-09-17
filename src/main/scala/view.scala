@@ -22,16 +22,12 @@ object View {
     leftPoints = 0,
     rightPoints = 0,
     config = config,
-    state = State.Start(
-      ballYPos = Random.nextInt(config.height),
-      ballXVel = Random.nextInt(2) + 1,
-      ballYVel = Random.nextInt(2) + 1
-    )
+    state = Model.start(Player.Left, config)
   )
 
   def draw(ctx: dom.CanvasRenderingContext2D, game: Game): Unit =
     game.state match {
-      case State.Start(ballYPos, ballXVel, ballYVel) =>
+      case State.Start(ballPos, ballVel) =>
         ()
 
       case State.Step(leftPaddlePos, rightPaddlePos, ballPos, ballVel) =>

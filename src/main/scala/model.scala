@@ -3,10 +3,24 @@ package etherpong
 import scala.util.Random
 
 object Model {
+  def start(player: Player, config: Config): State.Start = {
+    import config._
+    val (posX, velX) = player match {
+      case Player.Left =>
+        (paddleWidth + ballSize, Random.nextInt(3) + 1)
+      case Player.Right =>
+        (width - paddleWidth - ballSize, -1 * Random.nextInt(3) - 1)
+    }
+    State.Start(
+      ballPos = Point(posX, Random.nextInt(height)),
+      ballVel = Point(velX, Random.nextInt(7) - 3)
+    )
+  }
+
   def next(game: Game): Game = {
     import game.config._
     game.state match {
-      case State.Start(ballYPos, ballXVel, ballYVel) =>
+      case State.Start(ballPos, ballVel) =>
         Game(
           leftPoints = 0,
           rightPoints = 0,
@@ -14,8 +28,8 @@ object Model {
           state = State.Step(
             leftPaddlePos = (height - paddleLength) / 2,
             rightPaddlePos = (height - paddleLength) / 2,
-            ballPos = Point(paddleWidth + ballSize, ballYPos),
-            ballVel = Point(ballXVel, ballYVel)
+            ballPos = ballPos,
+            ballVel = ballVel
           )
         )
 
@@ -69,35 +83,21 @@ object Model {
           }
         )
 
-      case State.End(leftPaddlePos, rightPaddlePos, Player.Left) =>
+      case State.End(leftPaddlePos, rightPaddlePos, player) =>
+        val st = start(player, game.config)
+        val (leftWin, rightWin) = player match {
+          case Player.Left => (1, 0)
+          case Player.Right => (0, 1)
+        }
         Game(
-          leftPoints = game.leftPoints + 1,
-          rightPoints = game.rightPoints,
+          leftPoints = game.leftPoints + leftWin,
+          rightPoints = game.rightPoints + rightWin,
           config = game.config,
           state = State.Step(
             leftPaddlePos = leftPaddlePos,
             rightPaddlePos = rightPaddlePos,
-            ballPos = Point(
-              paddleWidth + ballSize,
-              Random.nextInt(height)
-            ),
-            ballVel = Point(Random.nextInt(3) + 1, Random.nextInt(3) + 1)
-          )
-        )
-
-      case State.End(leftPaddlePos, rightPaddlePos, Player.Right) =>
-        Game(
-          leftPoints = game.leftPoints,
-          rightPoints = game.rightPoints + 1,
-          config = game.config,
-          state = State.Step(
-            leftPaddlePos = leftPaddlePos,
-            rightPaddlePos = rightPaddlePos,
-            ballPos = Point(
-              width - paddleWidth - ballSize,
-              Random.nextInt(height)
-            ),
-            ballVel = Point(-1 * Random.nextInt(3) - 1, Random.nextInt(3) + 1)
+            ballPos = st.ballPos,
+            ballVel = st.ballVel
           )
         )
     }

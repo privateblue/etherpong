@@ -26,9 +26,8 @@ case class Game(
 trait State
 object State {
   case class Start(
-    ballYPos: Int,
-    ballXVel: Int,
-    ballYVel: Int
+    ballPos: Point,
+    ballVel: Point
   ) extends State
 
   case class Step(
