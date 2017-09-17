@@ -3,7 +3,7 @@ package etherpong
 import scala.util.Random
 
 object Model {
-  def start(player: Player, config: Config): State.Start = {
+  def start(player: Player, config: Config): State = {
     import config._
     val (posX, velX) = player match {
       case Player.Left =>
@@ -11,95 +11,82 @@ object Model {
       case Player.Right =>
         (width - paddleWidth - ballSize, -1 * Random.nextInt(3) - 1)
     }
-    State.Start(
+    State(
+      config = config,
+      leftPoints = 0,
+      rightPoints = 0,
+      leftPaddlePos = (height - paddleLength) / 2,
+      rightPaddlePos = (height - paddleLength) / 2,
       ballPos = Point(posX, Random.nextInt(height)),
       ballVel = Point(velX, Random.nextInt(7) - 3)
     )
   }
 
-  def next(game: Game): Game = {
-    import game.config._
-    game.state match {
-      case State.Start(ballPos, ballVel) =>
-        Game(
-          leftPoints = 0,
-          rightPoints = 0,
-          config = game.config,
-          state = State.Step(
-            leftPaddlePos = (height - paddleLength) / 2,
-            rightPaddlePos = (height - paddleLength) / 2,
-            ballPos = ballPos,
-            ballVel = ballVel
-          )
-        )
+  def next(state: State): State = {
+    import state._
+    import config._
+    val leftPadHit = touches(
+      pos = ballPos,
+      vel = ballVel,
+      ballSize = ballSize,
+      x = paddleWidth,
+      top = leftPaddlePos,
+      bottom = leftPaddlePos + paddleLength
+    )
 
-      case State.Step(leftPaddlePos, rightPaddlePos, ballPos, ballVel) =>
-        Game(
-          leftPoints = game.leftPoints,
-          rightPoints = game.rightPoints,
-          config = game.config,
-          state = {
-            val (px, vx) = move(
-              pos = ballPos.x,
-              vel = ballVel.x,
-              size = width,
-              offset = paddleWidth + ballSize
-            )
-            val (py, vy) = move(
-              pos = ballPos.y,
-              vel = ballVel.y,
-              size = height,
-              offset = ballSize
-            )
-            if (ballPos.x + ballVel.x < paddleWidth + ballSize
-                && ! touches(
-                       pos = ballPos,
-                       vel = ballVel,
-                       ballSize = ballSize,
-                       x = paddleWidth,
-                       top = leftPaddlePos,
-                       bottom = leftPaddlePos + paddleLength
-                     )
-               )
-              State.End(leftPaddlePos, rightPaddlePos, Player.Right)
-            else if (ballPos.x + ballVel.x > width - paddleWidth - ballSize
-                     && ! touches(
-                            pos = ballPos,
-                            vel = ballVel,
-                            ballSize = ballSize,
-                            x = width - paddleWidth,
-                            top = leftPaddlePos,
-                            bottom = leftPaddlePos + paddleLength
-                          )
-                    )
-              State.End(leftPaddlePos, rightPaddlePos, Player.Left)
-            else
-              State.Step(
-                leftPaddlePos = leftPaddlePos,
-                rightPaddlePos = rightPaddlePos,
-                ballPos = Point(px, py),
-                ballVel = Point(vx, vy)
-              )
-          }
-        )
+    val rightPadHit = touches(
+      pos = ballPos,
+      vel = ballVel,
+      ballSize = ballSize,
+      x = width - paddleWidth,
+      top = leftPaddlePos,
+      bottom = leftPaddlePos + paddleLength
+    )
 
-      case State.End(leftPaddlePos, rightPaddlePos, player) =>
-        val st = start(player, game.config)
-        val (leftWin, rightWin) = player match {
-          case Player.Left => (1, 0)
-          case Player.Right => (0, 1)
-        }
-        Game(
-          leftPoints = game.leftPoints + leftWin,
-          rightPoints = game.rightPoints + rightWin,
-          config = game.config,
-          state = State.Step(
-            leftPaddlePos = leftPaddlePos,
-            rightPaddlePos = rightPaddlePos,
-            ballPos = st.ballPos,
-            ballVel = st.ballVel
-          )
-        )
+    if (ballPos.x + ballVel.x < paddleWidth + ballSize && !leftPadHit) {
+      val st = start(Player.Right, config)
+      State(
+        config = config,
+        leftPoints = leftPoints,
+        rightPoints = rightPoints + 1,
+        leftPaddlePos,
+        rightPaddlePos,
+        ballPos = st.ballPos,
+        ballVel = st.ballVel
+      )
+    } else if (ballPos.x + ballVel.x > width - paddleWidth - ballSize && !rightPadHit) {
+      val st = start(Player.Left, config)
+      State(
+        config = config,
+        leftPoints = leftPoints + 1,
+        rightPoints = rightPoints,
+        leftPaddlePos,
+        rightPaddlePos,
+        ballPos = st.ballPos,
+        ballVel = st.ballVel
+      )
+    } else {
+      val (px, vx) = move(
+        pos = ballPos.x,
+        vel = ballVel.x,
+        size = width,
+        offset = paddleWidth + ballSize
+      )
+      val (py, vy) = move(
+        pos = ballPos.y,
+        vel = ballVel.y,
+        size = height,
+        offset = ballSize
+      )
+      State(
+        config = config,
+        leftPoints = leftPoints,
+        rightPoints = rightPoints,
+        leftPaddlePos = leftPaddlePos,
+        rightPaddlePos = rightPaddlePos,
+        ballPos = Point(px, py),
+        ballVel = Point(vx, vy)
+      )
     }
   }
 

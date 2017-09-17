@@ -16,30 +16,12 @@ case class Config(
   ballSize: Int
 )
 
-case class Game(
+case class State(
+  config: Config,
   leftPoints: Int,
   rightPoints: Int,
-  config: Config,
-  state: State
+  leftPaddlePos: Int,
+  rightPaddlePos: Int,
+  ballPos: Point,
+  ballVel: Point
 )
-
-trait State
-object State {
-  case class Start(
-    ballPos: Point,
-    ballVel: Point
-  ) extends State
-
-  case class Step(
-    leftPaddlePos: Int,
-    rightPaddlePos: Int,
-    ballPos: Point,
-    ballVel: Point
-  ) extends State
-
-  case class End(
-    leftPaddlePos: Int,
-    rightPaddlePos: Int,
-    winner: Player
-  ) extends State
-}
