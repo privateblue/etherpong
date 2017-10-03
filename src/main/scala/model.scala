@@ -84,8 +84,8 @@ object Model {
         config = config,
         leftPoints = leftPoints,
         rightPoints = rightPoints,
-        leftPaddlePos = leftPaddlePos,
-        rightPaddlePos = rightPaddlePos,
+        leftPaddlePos = movePaddle(Player.Left, ballPos, ballVel, config),
+        rightPaddlePos = movePaddle(Player.Right, ballPos, ballVel, config),
         ballPos = Point(px, py),
         ballVel = Point(vx, vy)
       )
@@ -109,5 +109,37 @@ object Model {
     val offset = if (math.signum(vel.x) < 0) 0 else -1 * ballSize
     val y = (x - pos.x + offset) * a + pos.y
     top - 1 <= y && y <= bottom + 1
+  }
+
+  def movePaddle(player: Player, pos: Point, vel: Point, config: Config): Int = {
+    import config._
+    val y = nextY(player, pos, vel, config)
+    math.min(math.max(y - paddleLength / 2, 0), height - paddleLength)
+  }
+
+  def nextY(player: Player, pos: Point, vel: Point, config: Config): Int = {
+    import config._
+    val left = paddleWidth
+    val top = 0
+    val right = width - paddleWidth - ballSize
+    val bottom = height - ballSize
+    val horT =
+      math.max((left - pos.x) / vel.x.toFloat, (right - pos.x) / vel.x.toFloat)
+    val verT =
+      if (vel.y == 0) Float.PositiveInfinity
+      else math.max((top - pos.y) / vel.y.toFloat, (bottom - pos.y) / vel.y.toFloat)
+    val t = math.min(horT, verT)
+    val x = pos.x + t * vel.x
+    val y = pos.y + t * vel.y
+    player match {
+      case Player.Left if x <= left => math.round(y)
+      case Player.Right if x >= right => math.round(y)
+      case _ =>
+        val (px, vx) =
+          move(pos.x + t.toInt * vel.x, vel.x, width, paddleWidth, ballSize)
+        val (py, vy) =
+          move(pos.y + t.toInt * vel.y, vel.y, height, 0, ballSize)
+        nextY(player, Point(px, py), Point(vx, vy), config)
+    }
   }
 }
