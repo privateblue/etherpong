@@ -17,16 +17,16 @@ object View {
     paddleWidth = 15,
     paddleSpeed = 1,
     ballSize = 15,
-    minBallSpeed = 2,
+    minBallSpeed = 5,
     maxBallSpeed = 5
   )
 
   @JSExport
   def main(canvas: html.Canvas): Unit = {
-    var state: State = Model.start(Player.Left, config)
+    var state: State = Model.init(Player.Left, config)
     val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
     dom.window.setInterval(() => {
-      state = Model.next(state)
+      state = Model.update(state)
       draw(ctx, state)
     }, 10)
   }
