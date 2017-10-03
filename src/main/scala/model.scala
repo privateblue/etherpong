@@ -115,7 +115,7 @@ object Model {
     val y = bounceHeight(player, pos, vel, config)
     val targetPaddlePos =
       math.min(math.max(y - paddleLength / 2, 0), height - paddleLength)
-    paddlePos + math.signum(targetPaddlePos - paddlePos) * paddleSpeed
+    paddlePos + math.signum(targetPaddlePos - paddlePos)
   }
 
   def bounceHeight(player: Player, pos: Point, vel: Point,

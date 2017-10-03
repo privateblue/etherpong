@@ -15,7 +15,6 @@ object View {
     height = 600,
     paddleLength = 100,
     paddleWidth = 15,
-    paddleSpeed = 1,
     ballSize = 15,
     minBallSpeed = 5,
     maxBallSpeed = 5

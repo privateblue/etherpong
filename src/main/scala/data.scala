@@ -13,7 +13,6 @@ case class Config(
   height: Int,
   paddleLength: Int,
   paddleWidth: Int,
-  paddleSpeed: Int,
   ballSize: Int,
   minBallSpeed: Int,
   maxBallSpeed: Int
