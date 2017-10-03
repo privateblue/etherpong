@@ -25,23 +25,17 @@ object Model {
   def next(state: State): State = {
     import state._
     import config._
-    val leftPadHit = touches(
-      pos = ballPos,
-      vel = ballVel,
-      ballSize = ballSize,
-      x = paddleWidth,
-      top = leftPaddlePos,
-      bottom = leftPaddlePos + paddleLength
-    )
 
-    val rightPadHit = touches(
-      pos = ballPos,
-      vel = ballVel,
-      ballSize = ballSize,
-      x = width - paddleWidth,
-      top = leftPaddlePos,
-      bottom = leftPaddlePos + paddleLength
-    )
+    val nextLeftBounceY = nextY(Player.Left, ballPos, ballVel, config)
+    val nextRightBounceY = nextY(Player.Right, ballPos, ballVel, config)
+
+    val leftPadHit =
+      leftPaddlePos - 1 <= nextLeftBounceY &&
+      nextLeftBounceY <= leftPaddlePos + paddleLength + 1
+
+    val rightPadHit =
+      rightPaddlePos - 1 <= nextRightBounceY &&
+      nextRightBounceY <= rightPaddlePos + paddleLength + 1
 
     if (ballPos.x + ballVel.x < paddleWidth && !leftPadHit) {
       val st = start(Player.Right, config)
@@ -101,14 +95,6 @@ object Model {
       (size - bounce(size - sum, edge + ballSize), -1 * vel)
     else
       (sum, vel)
-  }
-
-  def touches(pos: Point, vel: Point, ballSize: Int,
-              x: Int, top: Int, bottom: Int): Boolean = {
-    val a = vel.y / vel.x.toDouble
-    val offset = if (math.signum(vel.x) < 0) 0 else -1 * ballSize
-    val y = (x - pos.x + offset) * a + pos.y
-    top - 1 <= y && y <= bottom + 1
   }
 
   def movePaddle(player: Player, pos: Point, vel: Point, config: Config): Int = {
