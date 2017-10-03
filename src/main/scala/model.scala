@@ -78,8 +78,10 @@ object Model {
         config = config,
         leftPoints = leftPoints,
         rightPoints = rightPoints,
-        leftPaddlePos = movePaddle(Player.Left, ballPos, ballVel, config),
-        rightPaddlePos = movePaddle(Player.Right, ballPos, ballVel, config),
+        leftPaddlePos =
+          leftPaddlePos + movePaddle(leftPaddlePos, nextLeftBounceY, config),
+        rightPaddlePos =
+          rightPaddlePos + movePaddle(rightPaddlePos, nextRightBounceY, config),
         ballPos = Point(px, py),
         ballVel = Point(vx, vy)
       )
@@ -97,10 +99,11 @@ object Model {
       (sum, vel)
   }
 
-  def movePaddle(player: Player, pos: Point, vel: Point, config: Config): Int = {
+  def movePaddle(paddlePos: Int, nextY: Int, config: Config): Int = {
     import config._
-    val y = nextY(player, pos, vel, config)
-    math.min(math.max(y - paddleLength / 2, 0), height - paddleLength)
+    val targetPaddlePos =
+      math.min(math.max(nextY - paddleLength / 2, 0), height - paddleLength)
+    math.signum(targetPaddlePos - paddlePos)
   }
 
   def nextY(player: Player, pos: Point, vel: Point, config: Config): Int = {
