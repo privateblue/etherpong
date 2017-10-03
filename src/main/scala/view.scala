@@ -35,7 +35,8 @@ object View {
     import ctx._
     import state._
     import state.config._
-    clearRect(0, 0, width, height)
+    fillStyle = "rgb(200,200,200)"
+    fillRect(0, 0, width, height)
     fillStyle = "rgb(0,0,0)"
     fillRect(0, leftPaddlePos, paddleWidth, paddleLength)
     fillRect(width - paddleWidth, rightPaddlePos, paddleWidth, paddleLength)
