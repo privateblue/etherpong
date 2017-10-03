@@ -23,7 +23,9 @@ case class State(
   leftPoints: Int,
   rightPoints: Int,
   leftPaddlePos: Int,
+  leftPaddleVel: Int,
   rightPaddlePos: Int,
+  rightPaddleVel: Int,
   ballPos: Point,
   ballVel: Point
 )

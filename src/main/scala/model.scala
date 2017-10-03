@@ -17,7 +17,9 @@ object Model {
       leftPoints = 0,
       rightPoints = 0,
       leftPaddlePos = (height - paddleLength) / 2,
+      leftPaddleVel = 0,
       rightPaddlePos = (height - paddleLength) / 2,
+      rightPaddleVel = 0,
       ballPos = Point(posX, Random.nextInt(height)),
       ballVel = Point(velX, Random.nextInt(2 * maxBallSpeed + 1) - maxBallSpeed)
     )
@@ -52,8 +54,10 @@ object Model {
         config = config,
         leftPoints = leftPoints,
         rightPoints = rightPoints + 1,
-        leftPaddlePos,
-        rightPaddlePos,
+        leftPaddlePos = leftPaddlePos,
+        leftPaddleVel = st.leftPaddleVel,
+        rightPaddlePos = rightPaddlePos,
+        rightPaddleVel = st.rightPaddleVel,
         ballPos = st.ballPos,
         ballVel = st.ballVel
       )
@@ -63,8 +67,10 @@ object Model {
         config = config,
         leftPoints = leftPoints + 1,
         rightPoints = rightPoints,
-        leftPaddlePos,
-        rightPaddlePos,
+        leftPaddlePos = leftPaddlePos,
+        leftPaddleVel = leftPaddleVel,
+        rightPaddlePos = rightPaddlePos,
+        rightPaddleVel = rightPaddleVel,
         ballPos = st.ballPos,
         ballVel = st.ballVel
       )
@@ -83,16 +89,24 @@ object Model {
         edge = 0,
         ballSize = ballSize
       )
+      val leftPaddleY =
+        paddleStep(Player.Left, leftPaddlePos, ballPos, ballVel, config)
+      val rightPaddleY =
+        paddleStep(Player.Right, rightPaddlePos, ballPos, ballVel, config)
+      val velIncr =
+        if (atLeftEdge) leftPaddleVel
+        else if (atRightEdge) rightPaddleVel
+        else 0
       State(
         config = config,
         leftPoints = leftPoints,
         rightPoints = rightPoints,
-        leftPaddlePos =
-          paddleStep(Player.Left, leftPaddlePos, ballPos, ballVel, config),
-        rightPaddlePos =
-          paddleStep(Player.Right, rightPaddlePos, ballPos, ballVel, config),
+        leftPaddlePos = leftPaddleY,
+        leftPaddleVel = leftPaddleY - leftPaddlePos,
+        rightPaddlePos = rightPaddleY,
+        rightPaddleVel = rightPaddleY - rightPaddlePos,
         ballPos = Point(px, py),
-        ballVel = Point(vx, vy)
+        ballVel = Point(vx + velIncr, vy)
       )
     }
   }
@@ -109,16 +123,16 @@ object Model {
       (sum, vel)
   }
 
-  def paddleStep(player: Player, paddlePos: Int,
+  def paddleStep(side: Player, paddlePos: Int,
                  pos: Point, vel: Point, config: Config): Int = {
     import config._
-    val y = bounceHeight(player, pos, vel, config)
+    val y = bounceHeight(side, pos, vel, config)
     val targetPaddlePos =
       math.min(math.max(y - paddleLength / 2, 0), height - paddleLength)
     paddlePos + math.signum(targetPaddlePos - paddlePos)
   }
 
-  def bounceHeight(player: Player, pos: Point, vel: Point,
+  def bounceHeight(side: Player, pos: Point, vel: Point,
                    config: Config): Int = {
     import config._
     val left = paddleWidth
@@ -139,7 +153,7 @@ object Model {
     val t = math.min(horT, verT)
     val x = pos.x + t * vel.x
     val y = pos.y + t * vel.y
-    player match {
+    side match {
       case Player.Left if x <= left => math.round(y)
       case Player.Right if x >= right => math.round(y)
       case _ =>
@@ -147,7 +161,7 @@ object Model {
           ballStep(pos.x + t.toInt * vel.x, vel.x, width, paddleWidth, ballSize)
         val (py, vy) =
           ballStep(pos.y + t.toInt * vel.y, vel.y, height, 0, ballSize)
-        bounceHeight(player, Point(px, py), Point(vx, vy), config)
+        bounceHeight(side, Point(px, py), Point(vx, vy), config)
     }
   }
 }
