@@ -5,11 +5,12 @@ import scala.util.Random
 object Model {
   def start(player: Player, config: Config): State = {
     import config._
+    def random(min: Int, max: Int) = Random.nextInt(max - min + 1) + min
     val (posX, velX) = player match {
       case Player.Left =>
-        (paddleWidth, Random.nextInt(3) + 1)
+        (paddleWidth, random(minBallSpeed, maxBallSpeed))
       case Player.Right =>
-        (width - paddleWidth - ballSize, -1 * Random.nextInt(3) - 1)
+        (width - paddleWidth - ballSize, -1 * random(minBallSpeed, maxBallSpeed))
     }
     State(
       config = config,
@@ -18,7 +19,7 @@ object Model {
       leftPaddlePos = (height - paddleLength) / 2,
       rightPaddlePos = (height - paddleLength) / 2,
       ballPos = Point(posX, Random.nextInt(height)),
-      ballVel = Point(velX, Random.nextInt(7) - 3)
+      ballVel = Point(velX, Random.nextInt(2 * maxBallSpeed + 1) - maxBallSpeed)
     )
   }
 
@@ -103,7 +104,7 @@ object Model {
     import config._
     val targetPaddlePos =
       math.min(math.max(nextY - paddleLength / 2, 0), height - paddleLength)
-    math.signum(targetPaddlePos - paddlePos)
+    math.signum(targetPaddlePos - paddlePos) * paddleSpeed
   }
 
   def nextY(player: Player, pos: Point, vel: Point, config: Config): Int = {

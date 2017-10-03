@@ -15,7 +15,10 @@ object View {
     height = 600,
     paddleLength = 100,
     paddleWidth = 15,
-    ballSize = 15
+    paddleSpeed = 1,
+    ballSize = 15,
+    minBallSpeed = 2,
+    maxBallSpeed = 5
   )
 
   @JSExport
