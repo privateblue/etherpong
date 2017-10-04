@@ -3,10 +3,21 @@ package etherpong
 import scala.util.Random
 
 object Model {
-  def init(player: Player, config: Config): State = {
+  def init(config: Config): State =
+    restart(
+      side = Player.Left,
+      config = config,
+      leftPoints = 0,
+      rightPoints = 0,
+      leftPaddlePos = (config.height - config.paddleLength) / 2,
+      rightPaddlePos = (config.height - config.paddleLength) / 2
+    )
+
+  def restart(side: Player, config: Config, leftPoints: Int, rightPoints: Int,
+              leftPaddlePos: Int, rightPaddlePos: Int): State = {
     import config._
     def rnd(min: Int, max: Int) = Random.nextInt(max - min + 1) + min
-    val (posX, velX) = player match {
+    val (posX, velX) = side match {
       case Player.Left =>
         (paddleWidth, rnd(minBallSpeed, maxBallSpeed))
       case Player.Right =>
@@ -14,11 +25,12 @@ object Model {
     }
     State(
       config = config,
-      leftPoints = 0,
-      rightPoints = 0,
-      leftPaddlePos = (height - paddleLength) / 2,
+      restarted = true,
+      leftPoints = leftPoints,
+      rightPoints = rightPoints,
+      leftPaddlePos = leftPaddlePos,
       leftPaddleVel = 0,
-      rightPaddlePos = (height - paddleLength) / 2,
+      rightPaddlePos = rightPaddlePos,
       rightPaddleVel = 0,
       ballPos = Point(posX, Random.nextInt(height)),
       ballVel = Point(velX, Random.nextInt(2 * maxBallSpeed + 1) - maxBallSpeed)
@@ -49,30 +61,22 @@ object Model {
       )
 
     if (leftMiss) {
-      val st = init(Player.Right, config)
-      State(
+      restart(
+        side = Player.Right,
         config = config,
         leftPoints = leftPoints,
         rightPoints = rightPoints + 1,
         leftPaddlePos = leftPaddlePos,
-        leftPaddleVel = st.leftPaddleVel,
-        rightPaddlePos = rightPaddlePos,
-        rightPaddleVel = st.rightPaddleVel,
-        ballPos = st.ballPos,
-        ballVel = st.ballVel
+        rightPaddlePos = rightPaddlePos
       )
     } else if (rightMiss) {
-      val st = init(Player.Left, config)
-      State(
+      restart(
+        side = Player.Left,
         config = config,
         leftPoints = leftPoints + 1,
         rightPoints = rightPoints,
         leftPaddlePos = leftPaddlePos,
-        leftPaddleVel = leftPaddleVel,
-        rightPaddlePos = rightPaddlePos,
-        rightPaddleVel = rightPaddleVel,
-        ballPos = st.ballPos,
-        ballVel = st.ballVel
+        rightPaddlePos = rightPaddlePos
       )
     } else {
       val (px, vx) = ballStep(
@@ -99,6 +103,7 @@ object Model {
         else 0
       State(
         config = config,
+        restarted = false,
         leftPoints = leftPoints,
         rightPoints = rightPoints,
         leftPaddlePos = leftPaddleY,

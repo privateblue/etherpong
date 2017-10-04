@@ -20,6 +20,7 @@ case class Config(
 
 case class State(
   config: Config,
+  restarted: Boolean,
   leftPoints: Int,
   rightPoints: Int,
   leftPaddlePos: Int,
