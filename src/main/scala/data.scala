@@ -2,10 +2,10 @@ package etherpong
 
 case class Point(x: Int, y: Int)
 
-trait Player
-object Player {
-  case object Left extends Player
-  case object Right extends Player
+trait Side
+object Side {
+  case object Left extends Side
+  case object Right extends Side
 }
 
 case class Config(

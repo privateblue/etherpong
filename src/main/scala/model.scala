@@ -5,7 +5,7 @@ import scala.util.Random
 object Model {
   def init(config: Config): State =
     restart(
-      side = Player.Left,
+      side = Side.Left,
       config = config,
       leftPoints = 0,
       rightPoints = 0,
@@ -13,14 +13,14 @@ object Model {
       rightPaddlePos = (config.height - config.paddleLength) / 2
     )
 
-  def restart(side: Player, config: Config, leftPoints: Int, rightPoints: Int,
+  def restart(side: Side, config: Config, leftPoints: Int, rightPoints: Int,
               leftPaddlePos: Int, rightPaddlePos: Int): State = {
     import config._
     def rnd(min: Int, max: Int) = Random.nextInt(max - min + 1) + min
     val (posX, velX) = side match {
-      case Player.Left =>
+      case Side.Left =>
         (paddleWidth, rnd(minBallSpeed, maxBallSpeed))
-      case Player.Right =>
+      case Side.Right =>
         (width - paddleWidth - ballSize, -1 * rnd(minBallSpeed, maxBallSpeed))
     }
     State(
@@ -52,17 +52,17 @@ object Model {
     val leftMiss =
       atLeftEdge &&
       !leftPadRange.contains(
-        bounceHeight(Player.Left, ballPos, ballVel, config)
+        bounceHeight(Side.Left, ballPos, ballVel, config)
       )
     val rightMiss =
       atRightEdge &&
       !rightPadRange.contains(
-        bounceHeight(Player.Right, ballPos, ballVel, config)
+        bounceHeight(Side.Right, ballPos, ballVel, config)
       )
 
     if (leftMiss) {
       restart(
-        side = Player.Right,
+        side = Side.Right,
         config = config,
         leftPoints = leftPoints,
         rightPoints = rightPoints + 1,
@@ -71,7 +71,7 @@ object Model {
       )
     } else if (rightMiss) {
       restart(
-        side = Player.Left,
+        side = Side.Left,
         config = config,
         leftPoints = leftPoints + 1,
         rightPoints = rightPoints,
@@ -94,9 +94,9 @@ object Model {
         ballSize = ballSize
       )
       val leftPaddleY =
-        paddleStep(Player.Left, leftPaddlePos, ballPos, ballVel, config)
+        paddleStep(Side.Left, leftPaddlePos, ballPos, ballVel, config)
       val rightPaddleY =
-        paddleStep(Player.Right, rightPaddlePos, ballPos, ballVel, config)
+        paddleStep(Side.Right, rightPaddlePos, ballPos, ballVel, config)
       val velIncr =
         if (atLeftEdge) leftPaddleVel
         else if (atRightEdge) rightPaddleVel
@@ -128,7 +128,7 @@ object Model {
       (sum, vel)
   }
 
-  def paddleStep(side: Player, paddlePos: Int,
+  def paddleStep(side: Side, paddlePos: Int,
                  pos: Point, vel: Point, config: Config): Int = {
     import config._
     val y = bounceHeight(side, pos, vel, config)
@@ -137,7 +137,7 @@ object Model {
     paddlePos + math.signum(targetPaddlePos - paddlePos)
   }
 
-  def bounceHeight(side: Player, pos: Point, vel: Point,
+  def bounceHeight(side: Side, pos: Point, vel: Point,
                    config: Config): Int = {
     import config._
     val left = paddleWidth
@@ -159,8 +159,8 @@ object Model {
     val x = pos.x + t * vel.x
     val y = pos.y + t * vel.y
     side match {
-      case Player.Left if x <= left => math.round(y)
-      case Player.Right if x >= right => math.round(y)
+      case Side.Left if x <= left => math.round(y)
+      case Side.Right if x >= right => math.round(y)
       case _ =>
         val (px, vx) =
           ballStep(pos.x + t.toInt * vel.x, vel.x, width, paddleWidth, ballSize)
