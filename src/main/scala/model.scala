@@ -111,7 +111,7 @@ object Model {
         rightPaddlePos = rightPaddleY,
         rightPaddleVel = rightPaddleY - rightPaddlePos,
         ballPos = Point(px, py),
-        ballVel = Point(vx + velIncr, vy)
+        ballVel = Point(vx, vy + velIncr)
       )
     }
   }
