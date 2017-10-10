@@ -1,6 +1,8 @@
 package etherpong
 
-case class Point(x: Int, y: Int)
+case class Point(x: Int, y: Int) {
+  def +(that: Point) = Point(x + that.x, y + that.y)
+}
 
 trait Side
 object Side {
@@ -16,17 +18,4 @@ case class Config(
   ballSize: Int,
   minBallSpeed: Int,
   maxBallSpeed: Int
-)
-
-case class State(
-  config: Config,
-  restarted: Boolean,
-  leftPoints: Int,
-  rightPoints: Int,
-  leftPaddlePos: Int,
-  leftPaddleVel: Int,
-  rightPaddlePos: Int,
-  rightPaddleVel: Int,
-  ballPos: Point,
-  ballVel: Point
 )
