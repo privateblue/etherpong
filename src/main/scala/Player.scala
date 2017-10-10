@@ -23,7 +23,7 @@ class Player(side: Side, config: Config) {
              restartVel: Option[Point] = None): Unit =
 
     // RUNNING
-    if (running && block - lastUpdatedAt > 0 && opponent.isDefined) {
+    if (running && block > lastUpdatedAt && opponent.isDefined) {
       val frame = block - lastUpdatedAt
       val sideBounces = bounces(frame, left, right, ballPos.x, ballVel.x)
       val miss = sideBounces.find { t =>
@@ -74,7 +74,7 @@ class Player(side: Side, config: Config) {
       }
 
     // RESTART
-    } else if (!running && block - lastUpdatedAt > 0 && opponent.isDefined) {
+    } else if (!running && block > lastUpdatedAt && opponent.isDefined) {
       running = true
       val (p, v) = randomStart
       ballPos = restartPos.getOrElse(p)
