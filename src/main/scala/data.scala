@@ -2,6 +2,7 @@ package etherpong
 
 case class Point(x: Int, y: Int) {
   def +(that: Point) = Point(x + that.x, y + that.y)
+  override def toString = s"($x,$y)"
 }
 
 trait Side
