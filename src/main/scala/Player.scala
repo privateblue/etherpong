@@ -106,8 +106,17 @@ class Player(side: Side, config: Config) {
       case Side.Right =>
         (width - paddleWidth - ballSize, -1 * rnd(minBallSpeed, maxBallSpeed))
     }
-    val p = Point(posX, Random.nextInt(height - ballSize))
-    val v = Point(velX, Random.nextInt(2 * maxBallSpeed + 1) - maxBallSpeed)
+    val p = Point(
+      posX,
+      Random.nextInt(height - ballSize)
+    )
+    val v = Point(
+      velX,
+      Random.shuffle(List(
+        rnd(minBallSpeed, maxBallSpeed),
+        -1 * rnd(minBallSpeed, maxBallSpeed)
+      )).head
+    )
     (p, v)
   }
 
