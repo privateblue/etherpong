@@ -5,6 +5,7 @@ import scala.scalajs.js.annotation.JSExport
 
 import org.scalajs.dom
 import org.scalajs.dom.html
+import scala.scalajs.js.timers._
 
 import util.Random
 import math._
@@ -17,8 +18,8 @@ object Viewer {
     paddleLength = 80,
     paddleWidth = 13,
     ballSize = 13,
-    minBallSpeed = 4,
-    maxBallSpeed = 4
+    minBallSpeed = 1,
+    maxBallSpeed = 3
   )
   import config._
 
@@ -46,7 +47,7 @@ object Viewer {
     var leftScore: Int = 0
     var rightScore: Int = 0
 
-    dom.window.setInterval(() => {
+    setInterval(10) {
       if (Random.nextInt(10) < 1)
         Random.shuffle(List(left, right)).head.update(block)
 
@@ -57,7 +58,8 @@ object Viewer {
         ballVel = left.ballVel
         leftScore = left.score
         rightScore = right.score
-        draw(ctx, left.paddlePos, right.paddlePos, ballPos)
+        if (running) draw(ctx, left.paddlePos, right.paddlePos, ballPos)
+        else () // TODO render waiting screen
       } else if (running) {
         val t = block - lastUpdatedAt
         val p = pos(t, ballPos, ballVel)
@@ -75,16 +77,33 @@ object Viewer {
         if (leftMiss) {
           rightScore = rightScore + 1
           running = false
+          drawMiss(ctx, left.paddlePos, right.paddlePos, p, v)
         } else if (rightMiss) {
           leftScore = leftScore + 1
           running = false
+          drawMiss(ctx, left.paddlePos, right.paddlePos, p, v)
         }
 
         draw(ctx, left.paddlePos, right.paddlePos, p)
+      } else {
+        // TODO render waiting screen
       }
 
       block = block + 1
-    }, 10)
+    }
+  }
+
+  def drawMiss(ctx: dom.CanvasRenderingContext2D,
+               leftPaddlePos: Int, rightPaddlePos: Int,
+               pos: Point, vel: Point): Unit = {
+    var p = pos
+    var anim: SetIntervalHandle = null
+    anim = setInterval(10) {
+      p = p + vel
+      if (p.x >= 0 && p.y >= 0 && p.x + ballSize < width && p.y + ballSize < height) {
+        draw(ctx, leftPaddlePos, rightPaddlePos, p)
+      } else clearInterval(anim)
+    }
   }
 
   def draw(ctx: dom.CanvasRenderingContext2D,
@@ -96,6 +115,7 @@ object Viewer {
     fillRect(0, leftPaddlePos, paddleWidth, paddleLength)
     fillRect(width - paddleWidth, rightPaddlePos, paddleWidth, paddleLength)
     fillRect(ball.x, ball.y, ballSize, ballSize)
+    // TODO render score
   }
 
   val L = paddleWidth
