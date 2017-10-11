@@ -1,4 +1,6 @@
-package etherpong
+package etherpong.prototype
+
+import etherpong._
 
 import util.Random
 import math._
@@ -25,7 +27,7 @@ class Player(side: Side, config: Config) {
     // RUNNING
     if (running && block > lastUpdatedAt && opponent.isDefined) {
       val frame = block - lastUpdatedAt
-      val sideBounces = bounces(frame, left, right, ballPos.x, ballVel.x)
+      val sideBounces = extremas(frame, left, right, ballPos.x, ballVel.x)
       val miss = sideBounces.find { t =>
         val p = pos(t, ballPos, ballVel)
         val v = vel(t, ballPos, ballVel)
@@ -69,37 +71,37 @@ class Player(side: Side, config: Config) {
           ballVel = v
           lastUpdatedAt = block
           opponent.get.update(block)
-          paddlePos = paddlePos + paddleMove(p, v)
+          paddlePos = paddlePos + play(p, v)
 
       }
 
     // RESTART
     } else if (!running && block > lastUpdatedAt && opponent.isDefined) {
       running = true
-      val (p, v) = randomStart
+      val (p, v) = restart
       ballPos = restartPos.getOrElse(p)
       ballVel = restartVel.getOrElse(v)
       lastUpdatedAt = block
       opponent.get.update(block, Some(ballPos), Some(ballVel))
     }
 
-  def paddleMove(p: Point, v: Point): Int = {
+  def play(p: Point, v: Point): Int = {
     val t = side match {
       case Side.Left if v.x < 0 =>
-        nextBounceAt(left, right, p.x, v.x)
+        extrema(left, right, p.x, v.x)
       case Side.Right if v.x > 0 =>
-        nextBounceAt(left, right, p.x, v.x)
+        extrema(left, right, p.x, v.x)
       case _ =>
-        nextBounceAt(left, right, p.x, v.x) +
+        extrema(left, right, p.x, v.x) +
           (right - left) / abs(v.x).toFloat
     }
-    val y = position(t.toInt, bottom - top, paddleWidth, p.y, v.y)
+    val y = value(t.toInt, bottom - top, paddleWidth, p.y, v.y)
     val target = y - paddleLength / 2 + ballSize / 2
     val targetPaddlePos = min(max(target, top), bottom - paddleLength)
     signum(targetPaddlePos - paddlePos)
   }
 
-  private def randomStart: (Point, Point) = {
+  private def restart: (Point, Point) = {
     val (posX, velX) = startSide match {
       case Side.Left =>
         (left, rnd(minBallSpeed, maxBallSpeed))
@@ -124,33 +126,33 @@ class Player(side: Side, config: Config) {
 
   private def pos(t: Int, p: Point, v: Point): Point =
     Point(
-      position(t, right - left, paddleWidth, p.x, v.x),
-      position(t, bottom - top, paddleWidth, p.y, v.y)
+      value(t, right - left, paddleWidth, p.x, v.x),
+      value(t, bottom - top, paddleWidth, p.y, v.y)
     )
 
   private def vel(t: Int, p: Point, v: Point): Point =
     Point(
-      velocity(t, left, right, p.x, v.x),
-      velocity(t, top, bottom, p.y, v.y)
+      slope(t, left, right, p.x, v.x),
+      slope(t, top, bottom, p.y, v.y)
     )
 
-  private def position(t: Int, period: Int, shift: Int, p: Int, v: Int): Int =
+  private def value(t: Int, period: Int, shift: Int, p: Int, v: Int): Int =
     abs(
       mod(v * t + p - shift - period, 2 * period) - period
     ) + shift
 
-  private def velocity(t: Int, lo: Int, hi: Int, p: Int, v: Int) =
-    v * pow(-1, bounces(t, lo, hi, p, v).size).toInt
+  private def slope(t: Int, lo: Int, hi: Int, p: Int, v: Int) =
+    v * pow(-1, extremas(t, lo, hi, p, v).size).toInt
 
-  private def bounces(t: Int, lo: Int, hi: Int, p: Int, v: Int): List[Int] = {
-    nextBounceAt(lo, hi, p, v)
+  private def extremas(t: Int, lo: Int, hi: Int, p: Int, v: Int): List[Int] = {
+    extrema(lo, hi, p, v)
       .until(t.toFloat)
       .by((hi - lo).toFloat / abs(v).toFloat)
       .map(_.toInt)
       .toList
   }
 
-  private def nextBounceAt(lo: Int, hi: Int, p: Int, v: Int): Float =
+  private def extrema(lo: Int, hi: Int, p: Int, v: Int): Float =
     max(
       (lo - p) / v.toFloat,
       (hi - p) / v.toFloat
