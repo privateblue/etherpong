@@ -13,11 +13,11 @@ import math._
 @JSExportTopLevel("etherpong.Viewer")
 object Viewer {
   val config = Config(
-    width = 797,
-    height = 601,
+    width = 800,
+    height = 600,
     paddleLength = 80,
-    paddleWidth = 13,
-    ballSize = 13,
+    paddleWidth = 15,
+    ballSize = 15,
     minBallSpeed = 1,
     maxBallSpeed = 3
   )
@@ -27,8 +27,8 @@ object Viewer {
     override def toString = s"rgb($r,$g,$b)"
   }
 
-  val background = Color(200,200,200)
-  val foreground = Color(50,50,50)
+  val background = Color(0,0,0)
+  val foreground = Color(200,200,200)
 
   @JSExport
   def main(canvas: html.Canvas): Unit = {
@@ -48,8 +48,9 @@ object Viewer {
     var rightScore: Int = 0
 
     setInterval(10) {
-      if (Random.nextInt(10) < 1)
+      if (Random.nextInt(10) < 1) {
         Random.shuffle(List(left, right)).head.update(block)
+      }
 
       if (block == left.lastUpdatedAt && block == right.lastUpdatedAt) {
         lastUpdatedAt = block
@@ -58,8 +59,7 @@ object Viewer {
         ballVel = left.ballVel
         leftScore = left.score
         rightScore = right.score
-        if (running) draw(ctx, left.paddlePos, right.paddlePos, ballPos)
-        else () // TODO render waiting screen
+        draw(ctx, left.paddlePos, right.paddlePos, leftScore, rightScore, ballPos)
       } else if (running) {
         val t = block - lastUpdatedAt
         val p = pos(t, ballPos, ballVel)
@@ -77,16 +77,14 @@ object Viewer {
         if (leftMiss) {
           rightScore = rightScore + 1
           running = false
-          drawMiss(ctx, left.paddlePos, right.paddlePos, p, v)
+          drawMiss(ctx, left.paddlePos, right.paddlePos, leftScore, rightScore, p, v)
         } else if (rightMiss) {
           leftScore = leftScore + 1
           running = false
-          drawMiss(ctx, left.paddlePos, right.paddlePos, p, v)
+          drawMiss(ctx, left.paddlePos, right.paddlePos, leftScore, rightScore, p, v)
         }
 
-        draw(ctx, left.paddlePos, right.paddlePos, p)
-      } else {
-        // TODO render waiting screen
+        draw(ctx, left.paddlePos, right.paddlePos, leftScore, rightScore, p)
       }
 
       block = block + 1
@@ -95,38 +93,57 @@ object Viewer {
 
   def drawMiss(ctx: dom.CanvasRenderingContext2D,
                leftPaddlePos: Int, rightPaddlePos: Int,
+               leftScore: Int, rightScore: Int,
                pos: Point, vel: Point): Unit = {
     var p = pos
     var anim: SetIntervalHandle = null
     anim = setInterval(10) {
       p = p + vel
       if (p.x >= 0 && p.y >= 0 && p.x + ballSize < width && p.y + ballSize < height) {
-        draw(ctx, leftPaddlePos, rightPaddlePos, p)
+        draw(ctx, leftPaddlePos, rightPaddlePos, leftScore, rightScore, p)
       } else clearInterval(anim)
     }
   }
 
   def draw(ctx: dom.CanvasRenderingContext2D,
-           leftPaddlePos: Int, rightPaddlePos: Int, ball: Point): Unit = {
+           leftPaddlePos: Int, rightPaddlePos: Int,
+           leftScore: Int, rightScore: Int, ball: Point): Unit = {
     import ctx._
+
+    // CLEAR
     fillStyle = background.toString
     fillRect(0, 0, width, height)
+
     fillStyle = foreground.toString
+
+    // TOP, BOTTOM LINE
+    fillRect(0, 0, width, paddleWidth)
+    fillRect(0, height - paddleWidth, width, paddleWidth)
+
+    // MIDLINE
+    T until height by 3 * ballSize foreach { y =>
+      fillRect(width / 2 - ballSize / 2, y, ballSize, min(2 * ballSize, height - y))
+    }
+
+    // TODO SCORE
+
+    // PADDLES
     fillRect(0, leftPaddlePos, paddleWidth, paddleLength)
     fillRect(width - paddleWidth, rightPaddlePos, paddleWidth, paddleLength)
+
+    // BALL
     fillRect(ball.x, ball.y, ballSize, ballSize)
-    // TODO render score
   }
 
   val L = paddleWidth
-  val T = 0
+  val T = paddleWidth
   val R = width - paddleWidth - ballSize
-  val B = height - ballSize
+  val B = height - paddleWidth - ballSize
 
   private def pos(t: Int, p: Point, v: Point): Point =
     Point(
       position(t, R - L, paddleWidth, p.x, v.x),
-      position(t, B - T, 0, p.y, v.y)
+      position(t, B - T, paddleWidth, p.y, v.y)
     )
 
   private def vel(t: Int, p: Point, v: Point): Point =
@@ -159,8 +176,8 @@ object Viewer {
 
   private def paddleRange(pp: Int, vy: Int) =
     Range.inclusive(
-      max(0, pp - vy / 2 - ballSize),
-      min(height, pp + paddleLength - vy / 2)
+      max(T, pp - vy / 2 - ballSize),
+      min(B + ballSize, pp + paddleLength - vy / 2)
     )
 
   private def mod(a: Int, b: Int): Int =

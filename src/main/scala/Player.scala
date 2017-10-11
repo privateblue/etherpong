@@ -35,8 +35,8 @@ class Player(side: Side, config: Config) {
           case _ => opponent.get.paddlePos
         }
         val paddle = Range.inclusive(
-          max(0, pp - v.y / 2 - ballSize),
-          min(height, pp + paddleLength - v.y / 2)
+          max(top, pp - v.y / 2 - ballSize),
+          min(bottom + ballSize, pp + paddleLength - v.y / 2)
         )
         !paddle.contains(p.y)
       }
@@ -93,23 +93,20 @@ class Player(side: Side, config: Config) {
         nextBounceAt(left, right, p.x, v.x) +
           (right - left) / abs(v.x).toFloat
     }
-    val y = position(t.toInt, bottom - top, 0, p.y, v.y)
+    val y = position(t.toInt, bottom - top, paddleWidth, p.y, v.y)
     val target = y - paddleLength / 2 + ballSize / 2
-    val targetPaddlePos = min(max(target, 0), height - paddleLength)
+    val targetPaddlePos = min(max(target, top), bottom - paddleLength)
     signum(targetPaddlePos - paddlePos)
   }
 
   private def randomStart: (Point, Point) = {
     val (posX, velX) = startSide match {
       case Side.Left =>
-        (paddleWidth, rnd(minBallSpeed, maxBallSpeed))
+        (left, rnd(minBallSpeed, maxBallSpeed))
       case Side.Right =>
-        (width - paddleWidth - ballSize, -1 * rnd(minBallSpeed, maxBallSpeed))
+        (right, -1 * rnd(minBallSpeed, maxBallSpeed))
     }
-    val p = Point(
-      posX,
-      Random.nextInt(height - ballSize)
-    )
+    val p = Point(posX, rnd(top, bottom))
     val v = Point(
       velX,
       Random.shuffle(List(
@@ -121,14 +118,14 @@ class Player(side: Side, config: Config) {
   }
 
   val left = paddleWidth
-  val top = 0
+  val top = paddleWidth
   val right = width - paddleWidth - ballSize
-  val bottom = height - ballSize
+  val bottom = height - paddleWidth - ballSize
 
   private def pos(t: Int, p: Point, v: Point): Point =
     Point(
       position(t, right - left, paddleWidth, p.x, v.x),
-      position(t, bottom - top, 0, p.y, v.y)
+      position(t, bottom - top, paddleWidth, p.y, v.y)
     )
 
   private def vel(t: Int, p: Point, v: Point): Point =
