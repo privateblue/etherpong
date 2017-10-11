@@ -25,6 +25,9 @@ object Viewer {
   )
   import config._
 
+  val pong = new Pong(config)
+  val digits = new Digits(config)
+
   case class Color(r: Int, g: Int, b: Int) {
     override def toString = s"rgb($r,$g,$b)"
   }
@@ -41,8 +44,6 @@ object Viewer {
     val right = new Player(Side.Right, config)
     left.introduce(right)
     right.introduce(left)
-
-    val pong = new Pong(config)
 
     var block: Int = 0
     var running: Boolean = false
@@ -126,7 +127,8 @@ object Viewer {
       fillRect(x, y, w, h)
     }
 
-    // TODO SCORE
+    // SCORE
+    digits.drawScore(leftScore, rightScore)
 
     // PADDLES
     fillRect(0, leftPaddlePos, paddleWidth, paddleLength)
