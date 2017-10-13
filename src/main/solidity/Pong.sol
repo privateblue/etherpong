@@ -69,10 +69,14 @@ contract Pong {
         startSide = Side.Left;
     }
 
-    function introduce(address _opponent) external {
-        if (msg.sender == owner) {
-            opponentAddress = _opponent;
-            opponent = Pong(_opponent);
+    function introduce(address _opponentAddress) external returns (bool) {
+        Pong _opponent = Pong(_opponent);
+        if (msg.sender == owner && uint8(_opponent.side()) == 1 - uint8(side)) {
+            opponentAddress = _opponentAddress;
+            opponent = _opponent;
+            return true;
+        } else {
+            return false;
         }
     }
 
