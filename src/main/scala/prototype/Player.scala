@@ -92,10 +92,9 @@ class Player(side: Side, config: Config) {
       case Side.Right if v.x > 0 =>
         extrema(left, right, p.x, v.x)
       case _ =>
-        extrema(left, right, p.x, v.x) +
-          (right - left) / abs(v.x).toFloat
+        extrema(left, right, p.x, v.x) + 1000 * (right - left) / abs(v.x)
     }
-    val y = value(t.toInt, bottom - top, paddleWidth, p.y, v.y)
+    val y = value(t / 1000, bottom - top, paddleWidth, p.y, v.y)
     val target = y - paddleLength / 2 + ballSize / 2
     val targetPaddlePos = min(max(target, top), bottom - paddleLength)
     signum(targetPaddlePos - paddlePos)
@@ -146,16 +145,16 @@ class Player(side: Side, config: Config) {
 
   private def extremas(t: Int, lo: Int, hi: Int, p: Int, v: Int): List[Int] = {
     extrema(lo, hi, p, v)
-      .until(t.toFloat)
-      .by((hi - lo).toFloat / abs(v).toFloat)
-      .map(_.toInt)
+      .until(1000 * t)
+      .by(1000 * (hi - lo) / abs(v))
+      .map(_ / 1000)
       .toList
   }
 
-  private def extrema(lo: Int, hi: Int, p: Int, v: Int): Float =
+  private def extrema(lo: Int, hi: Int, p: Int, v: Int): Int =
     max(
-      (lo - p) / v.toFloat,
-      (hi - p) / v.toFloat
+      1000 * (lo - p) / v,
+      1000 * (hi - p) / v
     )
 
   private def mod(a: Int, b: Int): Int =

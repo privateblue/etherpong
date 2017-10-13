@@ -21,10 +21,10 @@ contract Pong {
     int16 minBallSpeed;
     int16 maxBallSpeed;
 
-    int16 left;
-    int16 top;
-    int16 right;
-    int16 bottom;
+    int left;
+    int top;
+    int right;
+    int bottom;
 
     // properties
 
@@ -112,8 +112,8 @@ contract Pong {
                     missScore = 1;
                 }
                 miss =
-                    imax(top, pp - v.y / 2 - ballSize) <= p.y &&
-                    p.y <= imin(bottom + ballSize, pp + paddleLength - v.y / 2);
+                    max(top, pp - v.y / 2 - ballSize) <= p.y &&
+                    p.y <= min(bottom + ballSize, pp + paddleLength - v.y / 2);
                 i++;
             }
 
@@ -161,21 +161,21 @@ contract Pong {
     // static helpers
 
     function play(Point p, Point v) private view returns (int8) {
-        fixed t;
+        int t;
         if ((side == Side.Left && v.x < 0) || (side == Side.Right && v.x > 0)) {
             t = extrema(left, right, p.x, v.x);
         } else {
-            t = extrema(left, right, p.x, v.x) + fixed(right - left) / fixed(abs(v.x));
+            t = extrema(left, right, p.x, v.x) + 1000 * (right - left) / abs(v.x);
         }
-        int y = value(int16(t), bottom - top, paddleWidth, p.y, v.y);
+        int y = value(t / 1000, bottom - top, paddleWidth, p.y, v.y);
         int target = y - paddleLength / 2 + ballSize / 2;
-        int targetPaddlePos = imin(imax(target, top), bottom - paddleLength);
+        int targetPaddlePos = min(max(target, top), bottom - paddleLength);
         return sign(targetPaddlePos - paddlePos);
     }
 
     function restart() private view returns (Point, Point) {
-        int16 posX;
-        int16 velX;
+        int posX;
+        int velX;
         if (startSide == Side.Left) {
             posX = left;
             velX = rnd(minBallSpeed, maxBallSpeed);
@@ -205,30 +205,30 @@ contract Pong {
         );
     }
 
-    function value(int t, int16 period, int16 shift, int p, int v) private pure returns (int) {
+    function value(int t, int period, int16 shift, int p, int v) private pure returns (int) {
         return abs(mod(v * t + p - shift - period, 2 * period) - period) + shift;
     }
 
-    function slope(int t, int16 hi, int16 lo, int p, int v) private returns (int) {
+    function slope(int t, int hi, int lo, int p, int v) private returns (int) {
         uint times = extremas(t, hi, lo, p, v).length;
         return negate(v, times);
     }
 
     int[] private xtrms;
 
-    function extremas(int t, int16 hi, int16 lo, int p, int v) private returns (int[]) {
-        xtrms = new int16[](0);
-        fixed start = extrema(lo, hi, p, v);
-        for (fixed i = start; i < fixed(t); i = i + fixed(hi - lo) / fixed(abs(v))) {
-            xtrms.push(int16(i));
+    function extremas(int t, int hi, int lo, int p, int v) private returns (int[]) {
+        xtrms = new int[](0);
+        int start = extrema(lo, hi, p, v);
+        for (int i = start; i < t * 1000; i = i + 1000 * hi - lo / abs(v)) {
+            xtrms.push(i / 1000);
         }
         return xtrms;
     }
 
-    function extrema(int16 hi, int16 lo, int p, int v) private pure returns (fixed) {
-        return fmax(
-            fixed(lo - p) / fixed(v),
-            fixed(hi - p) / fixed(v)
+    function extrema(int hi, int lo, int p, int v) private pure returns (int) {
+        return max(
+            1000 * (lo - p) / v,
+            1000 * (hi - p) / v
         );
     }
 
@@ -249,29 +249,21 @@ contract Pong {
         return a < 0 ? -1 * a : a;
     }
 
-    function imax(int a, int b) private pure returns (int) {
+    function max(int a, int b) private pure returns (int) {
         return a > b ? a : b;
     }
 
-    function fmax(fixed a, fixed b) private pure returns (fixed) {
-        return a > b ? a : b;
-    }
-
-    function imin(int a, int b) private pure returns (int) {
+    function min(int a, int b) private pure returns (int) {
         return a < b ? a : b;
     }
 
-    function fmin(fixed a, fixed b) private pure returns (fixed) {
-        return a < b ? a : b;
-    }
-
-    function mod(int a, int16 b) private pure returns (int) {
+    function mod(int a, int b) private pure returns (int) {
         return a < 0 ? (a % b + b) % b : a % b;
     }
 
-    function rnd(int16 min, int16 max) private view returns (int16) {
+    function rnd(int lower, int upper) private view returns (int) {
         uint lastBlockNumber = block.number - 1;
         int16 hashVal = int16(block.blockhash(lastBlockNumber));
-        return hashVal % (max - min + 1) + min;
+        return hashVal % (upper - lower + 1) + lower;
     }
 }
