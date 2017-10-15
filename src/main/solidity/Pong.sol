@@ -70,7 +70,7 @@ contract Pong {
     }
 
     function introduce(address _opponentAddress) external returns (bool) {
-        Pong _opponent = Pong(_opponent);
+        Pong _opponent = Pong(_opponentAddress);
         if (msg.sender == owner && uint8(_opponent.side()) == 1 - uint8(side)) {
             opponentAddress = _opponentAddress;
             opponent = _opponent;
