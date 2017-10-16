@@ -32,13 +32,18 @@ PongContract.new(800,600,80,15,15,1,3,0,{
               right.introduce(left.address, {from: owner, gas: 4700000}, function() {
                 console.log("Left introduced to Right");
                 setInterval(function() {
-                  console.log("Left running: " + left.running().toString());
-                  console.log("Right running: " + right.running().toString());
-                  console.log("Left ball position: " + left.ballPos().toString());
-                  console.log("Right ball position: " + right.ballPos().toString());
-                  console.log("Updating...")
+                  var n = web3.eth.blockNumber;
+                  console.log(n + ". Left running: " + left.running().toString());
+                  console.log(n + ". Left last updated at: " + left.lastUpdatedAt().toString());
+                  console.log(n + ". Right running: " + right.running().toString());
+                  console.log(n + ". Right last updated at: " + right.lastUpdatedAt().toString());
+                  console.log(n + ". Left ball position: " + left.ballPos().toString());
+                  console.log(n + ". Right ball position: " + right.ballPos().toString());
+                  console.log(n + ". Left ball velocity: " + left.ballVel().toString());
+                  console.log(n + ". Right ball velocity: " + right.ballVel().toString());
+                  console.log("Updating...\n")
                   left.update({from: owner, gas: 4700000});
-                }, 10000);
+                }, 19000);
               });
             });
           }
