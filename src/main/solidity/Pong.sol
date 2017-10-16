@@ -30,8 +30,7 @@ contract Pong {
 
     address owner;
     Side public side;
-    address public opponentAddress;
-    Pong opponent;
+    address public opponent;
 
     // state
 
@@ -69,10 +68,9 @@ contract Pong {
         startSide = Side.Left;
     }
 
-    function introduce(address _opponentAddress) external returns (bool) {
-        Pong _opponent = Pong(_opponentAddress);
-        if (msg.sender == owner && uint8(_opponent.side()) == 1 - uint8(side)) {
-            opponentAddress = _opponentAddress;
+    function introduce(address _opponent) external returns (bool) {
+        uint8 otherside = uint8(Pong(_opponent).side());
+        if (opponent == address(0) && msg.sender == owner && otherside == 1 - uint8(side)) {
             opponent = _opponent;
             return true;
         } else {
@@ -85,7 +83,7 @@ contract Pong {
     function update() external {
 
         // RUNNING
-        if (running && block.number > lastUpdatedAt && opponentAddress != address(0)) {
+        if (running && block.number > lastUpdatedAt && opponent != address(0)) {
             int frame = int(block.number - lastUpdatedAt);
 
             Point memory p;
@@ -109,7 +107,7 @@ contract Pong {
                     missStartSide = Side.Left;
                     missScore = 0;
                 } else {
-                    pp = opponent.paddlePos();
+                    pp = Pong(opponent).paddlePos();
                     missStartSide = side;
                     missScore = 1;
                 }
@@ -127,7 +125,7 @@ contract Pong {
                 ballPos = Point(p.x + v.x, p.y + v.y);
                 ballVel = v;
                 lastUpdatedAt = block.number;
-                opponent.update();
+                Pong(opponent).update();
 
             // REGULAR CASE
             } else {
@@ -136,23 +134,23 @@ contract Pong {
                 ballPos = p;
                 ballVel = v;
                 lastUpdatedAt = block.number;
-                opponent.update();
+                Pong(opponent).update();
                 paddlePos = paddlePos + play(p, v);
             }
 
         // RESTART
-        } else if (!running && block.number > lastUpdatedAt && opponentAddress != address(0)) {
+        } else if (!running && block.number > lastUpdatedAt && opponent != address(0)) {
             running = true;
             var (np, nv) = restart();
             ballPos = np;
             ballVel = nv;
             lastUpdatedAt = block.number;
-            opponent.updateWith(np.x, np.y, nv.x, nv.y);
+            Pong(opponent).updateWith(np.x, np.y, nv.x, nv.y);
         }
     }
 
     function updateWith(int px, int py, int vx, int vy) public {
-        if (!running && msg.sender == opponentAddress && block.number > lastUpdatedAt && opponentAddress != address(0)) {
+        if (!running && msg.sender == opponent && block.number > lastUpdatedAt && opponent != address(0)) {
             running = true;
             ballPos = Point(px, py);
             ballVel = Point(vx, vy);
