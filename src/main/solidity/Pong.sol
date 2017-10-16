@@ -92,15 +92,13 @@ contract Pong {
             Point memory v;
 
             int[] memory sideBounces = extremas(frame, left, right, ballPos.x, ballVel.x);
-            int missT;
             Side missStartSide;
             uint16 missScore;
             bool miss = false;
             uint i = 0;
             while (i < sideBounces.length || !miss) {
-                missT = sideBounces[i];
-                p = pos(missT, ballPos, ballVel);
-                v = vel(missT, ballPos, ballVel);
+                p = pos(sideBounces[i], ballPos, ballVel);
+                v = vel(sideBounces[i], ballPos, ballVel);
                 int16 pp;
                 if (side == Side.Left && p.x + v.x <= left) {
                     pp = paddlePos;
@@ -128,7 +126,7 @@ contract Pong {
                 score = score + missScore;
                 ballPos = Point(p.x + v.x, p.y + v.y);
                 ballVel = v;
-                lastUpdatedAt = lastUpdatedAt + uint(missT);
+                lastUpdatedAt = block.number;
                 opponent.update();
 
             // REGULAR CASE

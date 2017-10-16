@@ -60,7 +60,7 @@ class Player(side: Side, config: Config) {
           }
           ballPos = p + v
           ballVel = v
-          lastUpdatedAt = lastUpdatedAt + t
+          lastUpdatedAt = block
           opponent.get.update(block)
 
         // REGULAR CASE
