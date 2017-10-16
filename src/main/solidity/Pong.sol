@@ -94,7 +94,7 @@ contract Pong {
             uint16 missScore;
             bool miss = false;
             uint i = 0;
-            while (i < sideBounces.length || !miss) {
+            while (i < sideBounces.length && !miss) {
                 p = pos(sideBounces[i], ballPos, ballVel);
                 v = vel(sideBounces[i], ballPos, ballVel);
                 int16 pp;
