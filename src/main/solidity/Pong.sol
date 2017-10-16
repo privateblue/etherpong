@@ -18,8 +18,8 @@ contract Pong {
     int16 paddleLength;
     int16 paddleWidth;
     int16 ballSize;
-    int16 minBallSpeed;
-    int16 maxBallSpeed;
+    uint16 minBallSpeed;
+    uint16 maxBallSpeed;
 
     int left;
     int top;
@@ -45,8 +45,8 @@ contract Pong {
     // initialization
 
     function Pong(int16 _width, int16 _height, int16 _paddleLength,
-                  int16 _paddleWidth, int16 _ballSize, int16 _minBallSpeed,
-                  int16 _maxBallSpeed, Side _side) public {
+                  int16 _paddleWidth, int16 _ballSize, uint16 _minBallSpeed,
+                  uint16 _maxBallSpeed, Side _side) public {
         owner = msg.sender;
         width = _width;
         height = _height;
@@ -178,15 +178,18 @@ contract Pong {
         int velX;
         if (startSide == Side.Left) {
             posX = left;
-            velX = rnd(minBallSpeed, maxBallSpeed);
+            velX = int(rnd(minBallSpeed, maxBallSpeed));
         } else {
             posX = right;
-            velX = -1 * rnd(minBallSpeed, maxBallSpeed);
+            velX = -1 * int(rnd(minBallSpeed, maxBallSpeed));
         }
-        Point memory p = Point(posX, rnd(top, bottom));
+        Point memory p = Point(posX, int(rnd(uint(top), uint(bottom))));
         Point memory v = Point(
             velX,
-            [-1 * rnd(minBallSpeed, maxBallSpeed), rnd(minBallSpeed, maxBallSpeed)][block.number % 2]
+            [
+                -1 * int(rnd(minBallSpeed, maxBallSpeed)),
+                int(rnd(minBallSpeed, maxBallSpeed))
+            ][rnd(0,1)]
         );
         return (p, v);
     }
@@ -261,9 +264,9 @@ contract Pong {
         return a < 0 ? (a % b + b) % b : a % b;
     }
 
-    function rnd(int lower, int upper) private view returns (int) {
+    function rnd(uint lower, uint upper) private view returns (uint) {
         uint lastBlockNumber = block.number - 1;
-        int16 hashVal = int16(block.blockhash(lastBlockNumber));
+        uint hashVal = uint(block.blockhash(lastBlockNumber));
         return hashVal % (upper - lower + 1) + lower;
     }
 }
