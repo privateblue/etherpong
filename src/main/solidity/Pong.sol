@@ -2,7 +2,7 @@ pragma solidity ^0.4.11;
 
 contract Pong {
 
-    // types
+    // datatypes
 
     enum Side { Left, Right }
 
@@ -30,7 +30,7 @@ contract Pong {
 
     address owner;
     Side public side;
-    address opponentAddress;
+    address public opponentAddress;
     Pong opponent;
 
     // state
@@ -40,7 +40,7 @@ contract Pong {
     Point public ballPos;
     Point public ballVel;
     int16 public paddlePos;
-    uint16 score;
+    uint16 public score;
     Side public startSide;
 
     // initialization
@@ -86,12 +86,12 @@ contract Pong {
 
         // RUNNING
         if (running && block.number > lastUpdatedAt && opponentAddress != address(0)) {
-            uint frame = block.number - lastUpdatedAt;
+            int frame = int(block.number - lastUpdatedAt);
 
             Point memory p;
             Point memory v;
 
-            int[] memory sideBounces = extremas(int(frame), left, right, ballPos.x, ballVel.x);
+            int[] memory sideBounces = extremas(frame, left, right, ballPos.x, ballVel.x);
             int missT;
             Side missStartSide;
             uint16 missScore;
@@ -133,8 +133,8 @@ contract Pong {
 
             // REGULAR CASE
             } else {
-                p = pos(int(frame), ballPos, ballVel);
-                v = vel(int(frame), ballPos, ballVel);
+                p = pos(frame, ballPos, ballVel);
+                v = vel(frame, ballPos, ballVel);
                 ballPos = p;
                 ballVel = v;
                 lastUpdatedAt = block.number;
