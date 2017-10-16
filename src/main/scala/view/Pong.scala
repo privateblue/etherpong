@@ -18,14 +18,14 @@ class Pong(config: Config) {
       max(T, paddlePos - v.y / 2 - ballSize),
       min(B + ballSize, paddlePos + paddleLength - v.y / 2)
     )
-    val bt = extrema(L, R, p.x, v.x).toInt
+    val bt = extrema(L, R, p.x, v.x)
     val leftMiss =
-      bt == 0 &&
-      p.x + v.x <= L &&
+      bt / 1000 == 0 &&
+      p.x + v.x < L &&
       !hitrange(leftPaddlePos).contains(p.y)
     val rightMiss =
-      bt == 0 &&
-      p.x + v.x >= R &&
+      bt / 1000 == 0 &&
+      p.x + v.x > R &&
       !hitrange(rightPaddlePos).contains(p.y)
     (leftMiss, rightMiss)
   }
