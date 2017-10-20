@@ -29,10 +29,6 @@ trait State extends js.Object {
 @JSImport("./client.js", JSImport.Namespace)
 object Client extends js.Object {
   def getConfig(address: String): Config = js.native
-
-  def onBlock(
-    leftAddress: String,
-    rightAddress: String,
-    callback: js.Function2[State, State, Unit]
-  ): Unit = js.native
+  def onBlock(leftAddress: String, rightAddress: String,
+              callback: js.Function2[State, State, Unit]): Unit = js.native
 }
