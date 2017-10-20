@@ -4,7 +4,9 @@ import etherpong._
 
 import math._
 
-class Pong(config: Config) {
+case class Point(x: Int, y: Int)
+
+class Pong(implicit config: Config) {
   import config._
 
   val L = paddleWidth

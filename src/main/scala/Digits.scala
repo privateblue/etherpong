@@ -5,7 +5,7 @@ import etherpong._
 import scalajs.js.Array
 import org.scalajs.dom
 
-class Digits(config: Config) {
+class Digits(implicit config: Config) {
   import config._
 
   val lw = paddleWidth

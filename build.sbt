@@ -8,6 +8,12 @@ libraryDependencies ++= Seq(
   "org.scala-js" %%% "scalajs-dom" % "0.9.1"
 )
 
-assemblyJarName in assembly := s"${name.value}.jar"
-
 enablePlugins(ScalaJSPlugin)
+
+enablePlugins(ScalaJSBundlerPlugin)
+
+scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
+
+npmDependencies in Compile ++= Seq(
+  "web3" -> "0.20.1"
+)

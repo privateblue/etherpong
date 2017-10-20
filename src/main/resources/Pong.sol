@@ -13,13 +13,13 @@ contract Pong {
 
     // config
 
-    int16 width;
-    int16 height;
-    int16 paddleLength;
-    int16 paddleWidth;
-    int16 ballSize;
-    uint16 minBallSpeed;
-    uint16 maxBallSpeed;
+    int16 public width;
+    int16 public height;
+    int16 public paddleLength;
+    int16 public paddleWidth;
+    int16 public ballSize;
+    uint16 public minBallSpeed;
+    uint16 public maxBallSpeed;
 
     int left;
     int top;
