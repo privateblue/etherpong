@@ -24,8 +24,8 @@ object Viewer {
 
   def toPoint(arr: js.Array[Int]): Point = Point(arr(0), arr(1))
 
-  val leftAddress = "0x14e97af287fa89596cd7b5e21be3756165d8a068"
-  val rightAddress = "0xc439b75412511feb80589363d989cd1268dea5f3"
+  val leftAddress = "0x15b1df0bb24636d88532c0412fe710ebd7238824"
+  val rightAddress = "0x69d0a76f728cd7d6495333064c9fd7e215b5e0dc"
 
   val background = Color(0,0,0)
   val foreground = Color(200,200,200)

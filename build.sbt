@@ -12,6 +12,10 @@ enablePlugins(ScalaJSPlugin)
 
 enablePlugins(ScalaJSBundlerPlugin)
 
+webpackBundlingMode := BundlingMode.LibraryAndApplication()
+
+emitSourceMaps := false
+
 scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
 
 npmDependencies in Compile ++= Seq(
