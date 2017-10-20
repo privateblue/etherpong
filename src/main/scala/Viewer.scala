@@ -35,8 +35,7 @@ object Viewer {
     implicit val ctx =
       canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-    implicit val config =
-      Client.config(leftAddress, rightAddress)
+    implicit val config = Client.getConfig(leftAddress)
 
     implicit val digits = new Digits
 
@@ -49,36 +48,24 @@ object Viewer {
     var scoreLeft: Int = 0
     var scoreRight: Int = 0
 
-    Client.onBlock(leftAddress, rightAddress) {
-      (
-        block: Int,
-        leftRunning: Boolean,
-        rightRunning: Boolean,
-        leftLastUpdatedAt: Int,
-        rightLastUpdatedAt: Int,
-        leftBallPos: js.Array[Int],
-        rightBallPos: js.Array[Int],
-        leftBallVel: js.Array[Int],
-        rightBallVel: js.Array[Int],
-        leftScore: Int,
-        rightScore: Int,
-        leftPaddlePos: Int,
-        rightPaddlePos: Int
-      ) =>
-        if (block == leftLastUpdatedAt && block == rightLastUpdatedAt) {
-          lastUpdatedAt = block
-          running = leftRunning
-          ballPos = toPoint(leftBallPos)
-          ballVel = toPoint(leftBallVel)
-          scoreLeft = leftScore
-          scoreRight = rightScore
-          draw(leftPaddlePos, rightPaddlePos, scoreLeft, scoreRight, ballPos)
+    Client.onBlock(
+      leftAddress,
+      rightAddress,
+      (left, right) =>
+        if (left.block == left.lastUpdatedAt && right.block == right.lastUpdatedAt) {
+          lastUpdatedAt = left.block
+          running = left.running
+          ballPos = toPoint(left.ballPos)
+          ballVel = toPoint(left.ballVel)
+          scoreLeft = left.score
+          scoreRight = right.score
+          draw(left.paddlePos, right.paddlePos, scoreLeft, scoreRight, ballPos)
         } else if (running) {
-          val t = block - lastUpdatedAt
+          val t = left.block - lastUpdatedAt
           val p = pong.pos(t, ballPos, ballVel)
           val v = pong.vel(t, ballPos, ballVel)
           val (leftMiss, rightMiss) =
-            pong.misses(leftPaddlePos, rightPaddlePos, p, v)
+            pong.misses(left.paddlePos, right.paddlePos, p, v)
           if (leftMiss) {
             scoreRight = scoreRight + 1
             running = false
@@ -86,9 +73,9 @@ object Viewer {
             scoreLeft = scoreLeft + 1
             running = false
           }
-          draw(leftPaddlePos, rightPaddlePos, scoreLeft, scoreRight, p)
+          draw(left.paddlePos, right.paddlePos, scoreLeft, scoreRight, p)
         }
-    }
+    )
   }
 
   def draw(leftPaddlePos: Int, rightPaddlePos: Int,

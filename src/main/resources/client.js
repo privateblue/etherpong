@@ -41,43 +41,46 @@ function update(leftAddress, rightAddress, interval) {
   }, interval);
 }
 
-function config(leftAddress, rightAddress) {
-  var left = PongContract.at(leftAddress);
-  var right = PongContract.at(rightAddress);
+function getConfig(address) {
+  const contract = PongContract.at(address);
   return {
-    width: left.width().toNumber(),
-    height: left.height().toNumber(),
-    paddleLength: left.paddleLength().toNumber(),
-    paddleWidth: left.paddleWidth().toNumber(),
-    ballSize: left.ballSize().toNumber(),
-    minBallSpeed: left.minBallSpeed().toNumber(),
-    maxBallSpeed: left.maxBallSpeed().toNumber()
+    width: contract.width().toNumber(),
+    height: contract.height().toNumber(),
+    paddleLength: contract.paddleLength().toNumber(),
+    paddleWidth: contract.paddleWidth().toNumber(),
+    ballSize: contract.ballSize().toNumber(),
+    minBallSpeed: contract.minBallSpeed().toNumber(),
+    maxBallSpeed: contract.maxBallSpeed().toNumber()
   };
 }
 
 function onBlock(leftAddress, rightAddress, callback) {
-  var left = PongContract.at(leftAddress);
-  var right = PongContract.at(rightAddress);
-  var filter = web3.eth.filter('latest');
+  const left = PongContract.at(leftAddress);
+  const right = PongContract.at(rightAddress);
+  const filter = web3.eth.filter('latest');
   filter.watch(function (error, blockHash) {
     if (!error) {
-      callback(
-        web3.eth.blockNumber,
-        left.running(),
-        right.running(),
-        left.lastUpdatedAt().toNumber(),
-        right.lastUpdatedAt().toNumber(),
-        left.ballPos().map(n => n.toNumber()),
-        right.ballPos().map(n => n.toNumber()),
-        left.ballVel().map(n => n.toNumber()),
-        right.ballVel().map(n => n.toNumber()),
-        left.score().toNumber(),
-        right.score().toNumber(),
-        left.paddlePos().toNumber(),
-        right.paddlePos().toNumber()
-      );
+      let leftState = {
+        block: web3.eth.blockNumber,
+        running: left.running(),
+        lastUpdatedAt: left.lastUpdatedAt().toNumber(),
+        ballPos: left.ballPos().map(n => n.toNumber()),
+        ballVel: left.ballVel().map(n => n.toNumber()),
+        score: left.score().toNumber(),
+        paddlePos: left.paddlePos().toNumber()
+      };
+      let rightState = {
+        block: web3.eth.blockNumber,
+        running: right.running(),
+        lastUpdatedAt: right.lastUpdatedAt().toNumber(),
+        ballPos: right.ballPos().map(n => n.toNumber()),
+        ballVel: right.ballVel().map(n => n.toNumber()),
+        score: right.score().toNumber(),
+        paddlePos: right.paddlePos().toNumber()
+      };
+      callback(leftState, rightState);
     }
   });
 }
 
-module.exports = { init, update, onBlock };
+module.exports = { init, update, getConfig, onBlock };
